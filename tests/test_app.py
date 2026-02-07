@@ -27,7 +27,11 @@ def test_ui_route_serves_html():
 
 def test_firebase_config_shape():
     r = client.get("/firebase-config")
-    assert r.status_code == 200
     body = r.json()
+    if r.status_code == 503:
+        assert body.get("error") == "CONFIGURATION_NOT_FOUND"
+        assert "missing" in body
+        return
+    assert r.status_code == 200
     for k in ["apiKey", "authDomain", "projectId", "appId", "messagingSenderId"]:
         assert k in body

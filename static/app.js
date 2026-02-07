@@ -6,10 +6,19 @@ const GUEST = new URLSearchParams(window.location.search).get('guest') === '1';
 let auth = null;
 let db = null;
 if (!GUEST) {
-  const cfg = await fetch('/firebase-config').then(r => r.json());
-  const app = initializeApp(cfg);
-  auth = getAuth(app);
-  db = getFirestore(app);
+  try {
+    const res = await fetch('/firebase-config');
+    const cfg = await res.json();
+    if (!res.ok || !cfg.apiKey || !cfg.projectId) {
+      console.warn('Firebase config missing or incomplete', cfg.error || cfg);
+      throw new Error(cfg.message || 'CONFIGURATION_NOT_FOUND');
+    }
+    const app = initializeApp(cfg);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } catch (e) {
+    console.error('Firebase init failed', e);
+  }
 }
 
 const authView = document.getElementById('auth');

@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -72,8 +72,7 @@ def read_root():
 def ui():
     return FileResponse("static/index.html")
 
-@app.get("/firebase-config")
-def firebase_config():
+def _firebase_config_dict():
     return {
         "apiKey": os.environ.get("FIREBASE_API_KEY", ""),
         "authDomain": os.environ.get("FIREBASE_AUTH_DOMAIN", ""),
@@ -81,8 +80,25 @@ def firebase_config():
         "appId": os.environ.get("FIREBASE_APP_ID", ""),
         "messagingSenderId": os.environ.get("FIREBASE_MESSAGING_SENDER_ID", ""),
         "storageBucket": os.environ.get("FIREBASE_STORAGE_BUCKET", ""),
-        "measurementId": os.environ.get("FIREBASE_MEASUREMENT_ID", "")
+        "measurementId": os.environ.get("FIREBASE_MEASUREMENT_ID", ""),
     }
+
+
+@app.get("/firebase-config")
+def firebase_config():
+    cfg = _firebase_config_dict()
+    required = ["apiKey", "authDomain", "projectId", "appId"]
+    missing = [k for k in required if not (cfg.get(k) or "").strip()]
+    if missing:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "CONFIGURATION_NOT_FOUND",
+                "message": "Firebase 未配置或配置不完整，请在服务器设置环境变量：FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, FIREBASE_APP_ID",
+                "missing": missing,
+            },
+        )
+    return cfg
 
 @app.post("/chat")
 def chat(query: Query):
