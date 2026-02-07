@@ -1,4 +1,4 @@
-name: CI and Deploy to Railway
+name: CI and Deploy to Railway - RZ test
 
 on:
   push:
