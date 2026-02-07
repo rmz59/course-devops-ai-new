@@ -79,7 +79,7 @@ def firebase_config():
         "authDomain": os.environ.get("FIREBASE_AUTH_DOMAIN", ""),
         "projectId": os.environ.get("FIREBASE_PROJECT_ID", ""),
         "appId": os.environ.get("FIREBASE_APP_ID", ""),
-        "messagingSenderId": os.environ.get("FIREBASE_MESSAGING_SENDER_ID", "")
+        "messagingSenderId": os.environ.get("FIREBASE_MESSAGING_SENDER_ID", ""),
         "storageBucket": os.environ.get("FIREBASE_STORAGE_BUCKET", ""),
         "measurementId": os.environ.get("FIREBASE_MEASUREMENT_ID", "")
     }
